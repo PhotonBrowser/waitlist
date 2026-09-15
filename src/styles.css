@@ -1,0 +1,238 @@
+@import url("https://fonts.googleapis.com/css2?family=Instrument+Sans:wdth,wght@75..100,400..700&display=swap");
+@import "tailwindcss";
+
+:root {
+	--font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif;
+}
+
+@layer base {
+	html,
+  body,
+  #app {
+    min-height: 100%;
+  }
+
+  body {
+    margin: 0;
+    min-width: 320px;
+    overflow-x: hidden;
+    background: #f4f1eb;
+    color: #17191d;
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  a {
+    color: inherit;
+  }
+}
+
+button,
+a,
+input {
+  transition: color 180ms ease, background-color 180ms ease, border-color 180ms ease, box-shadow 180ms ease;
+}
+
+.photon-page {
+  min-height: 100dvh;
+  padding: 8px;
+}
+
+.photon-canvas {
+  position: relative;
+  isolation: isolate;
+  display: flex;
+  min-height: calc(100dvh - 16px);
+  flex-direction: column;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.92);
+  border-radius: clamp(24px, 3vw, 32px);
+  background: rgba(255, 255, 255, 0.46);
+  box-shadow: 0 24px 70px rgba(86, 82, 72, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.96);
+  backdrop-filter: blur(22px);
+}
+
+.photon-canvas::after {
+  position: absolute;
+  z-index: 1;
+  inset: 0;
+  pointer-events: none;
+  content: '';
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.78' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='.22'/%3E%3C/svg%3E");
+  mix-blend-mode: soft-light;
+  opacity: 0.12;
+}
+
+.photon-light {
+  position: absolute;
+  z-index: -1;
+  pointer-events: none;
+  border-radius: 999px;
+  filter: blur(20px);
+}
+
+.photon-light--cyan {
+  top: -13%;
+  left: 9%;
+  width: 56%;
+  height: 48%;
+  background: radial-gradient(ellipse, rgba(146, 231, 239, 0.45), transparent 70%);
+}
+
+.photon-light--blue {
+  top: 4%;
+  right: -7%;
+  width: 52%;
+  height: 48%;
+  background: radial-gradient(ellipse, rgba(168, 207, 244, 0.34), transparent 68%);
+}
+
+.photon-light--lilac {
+  right: 19%;
+  bottom: 14%;
+  width: 44%;
+  height: 42%;
+  background: radial-gradient(ellipse, rgba(213, 202, 242, 0.28), transparent 70%);
+}
+
+.photon-light--peach {
+  bottom: -20%;
+  left: 2%;
+  width: 34%;
+  height: 35%;
+  background: radial-gradient(ellipse, rgba(244, 210, 183, 0.18), transparent 70%);
+}
+
+.photon-atmosphere {
+  position: absolute;
+  z-index: -1;
+  right: 7%;
+  bottom: -18%;
+  left: 7%;
+  height: 49%;
+  border-radius: 50%;
+  background:
+    radial-gradient(ellipse at 25% 58%, rgba(135, 228, 236, 0.26), transparent 55%),
+    radial-gradient(ellipse at 53% 46%, rgba(180, 207, 246, 0.27), transparent 50%),
+    radial-gradient(ellipse at 78% 62%, rgba(215, 203, 243, 0.26), transparent 48%),
+    radial-gradient(ellipse at 46% 84%, rgba(244, 211, 184, 0.14), transparent 44%);
+  filter: blur(34px);
+  opacity: 0.7;
+  transform: rotate(-4deg);
+}
+
+.photon-input {
+  border-width: 1px;
+  border-color: rgba(255, 255, 255, 0.72);
+  background-color: rgba(255, 255, 255, 0.35);
+  box-shadow: none;
+  outline: none;
+  transition: background-color 180ms ease, border-color 180ms ease, box-shadow 180ms ease;
+}
+
+.photon-input:hover:not(:focus):not(:focus-visible) {
+  border-color: rgba(255, 255, 255, 0.9);
+  background-color: rgba(255, 255, 255, 0.48);
+}
+
+.photon-input:focus,
+.photon-input:focus-visible,
+.photon-input[data-focused="true"],
+.photon-input[data-focus-visible="true"] {
+  border-color: rgba(255, 255, 255, 0.72);
+  background-color: rgba(255, 255, 255, 0.35);
+  box-shadow: none;
+  outline: none;
+}
+
+.photon-button {
+  transition: background-color 180ms ease, color 180ms ease, box-shadow 180ms ease;
+  will-change: transform;
+}
+
+.photon-button:focus-visible,
+.photon-button[data-focus-visible="true"] {
+	outline: 2px solid rgba(45, 55, 62, 0.4);
+	outline-offset: 2px;
+}
+
+.photon-hero-stage {
+	display: grid;
+	width: 100%;
+	place-items: center;
+}
+
+.photon-hero-content,
+.photon-success-state {
+	grid-column: 1;
+	grid-row: 1;
+}
+
+.photon-hero-content {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	width: 100%;
+}
+
+.photon-success-state {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 14px;
+}
+
+.photon-success-copy {
+	margin: 0;
+	font-size: 19px;
+	font-weight: 500;
+	letter-spacing: -0.03em;
+	color: #17191d;
+}
+
+.photon-confetti {
+	position: fixed;
+	z-index: 20;
+	inset: 0;
+	pointer-events: none;
+}
+
+@media (max-width: 639px) {
+  .photon-page {
+    padding: 6px;
+  }
+
+  .photon-canvas {
+    min-height: calc(100dvh - 12px);
+    border-radius: 22px;
+  }
+
+  .photon-light--cyan {
+    left: -24%;
+    width: 100%;
+  }
+
+  .photon-light--blue {
+    top: 16%;
+    right: -38%;
+    width: 100%;
+  }
+
+  .photon-atmosphere {
+    right: -28%;
+    bottom: -12%;
+    left: -28%;
+    height: 40%;
+    filter: blur(30px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+	button,
+	a,
+	input {
+		transition: none;
+	}
+
+}

@@ -27,6 +27,25 @@ function hasRememberedSignup() {
 	}
 }
 
+function drawSmallConfetti(
+	this: { shape: number; radius: number; w: number; h: number },
+	context: CanvasRenderingContext2D,
+) {
+	if (this.shape === 0) {
+		context.arc(0, 0, this.radius * 0.4, 0, 2 * Math.PI);
+		context.fill();
+	} else if (this.shape === 1) {
+		context.fillRect(-this.w * 0.2, -this.h * 0.2, this.w * 0.4, this.h * 0.4);
+	} else {
+		context.fillRect(
+			-this.w * 0.067,
+			-this.h * 0.2,
+			this.w * 0.134,
+			this.h * 0.4,
+		);
+	}
+}
+
 function useWindowSize() {
 	const [size, setSize] = useState({ width: 0, height: 0 });
 
@@ -281,9 +300,11 @@ function WaitlistHero() {
 						height={height}
 						initialVelocityX={{ min: 3, max: 11 }}
 						initialVelocityY={{ min: -18, max: -10 }}
-						numberOfPieces={90}
+						numberOfPieces={150}
 						onConfettiComplete={() => setShowConfetti(false)}
 						recycle={false}
+						drawShape={drawSmallConfetti}
+						tweenDuration={420}
 						width={width}
 					/>
 					<Confetti
@@ -294,8 +315,10 @@ function WaitlistHero() {
 						height={height}
 						initialVelocityX={{ min: -11, max: -3 }}
 						initialVelocityY={{ min: -18, max: -10 }}
-						numberOfPieces={90}
+						numberOfPieces={150}
+						drawShape={drawSmallConfetti}
 						recycle={false}
+						tweenDuration={420}
 						width={width}
 					/>
 				</>

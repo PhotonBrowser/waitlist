@@ -1,8 +1,12 @@
-@import url("https://fonts.googleapis.com/css2?family=Instrument+Sans:wdth,wght@75..100,400..700&display=swap");
 @import "tailwindcss";
 
 :root {
 	--font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif;
+	--stagger-dur: 500ms;
+	--stagger-distance: 12px;
+	--stagger-stagger: 40ms;
+	--stagger-blur: 3px;
+	--stagger-ease: cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 @layer base {
@@ -140,10 +144,14 @@ input {
 .photon-input:focus-visible,
 .photon-input[data-focused="true"],
 .photon-input[data-focus-visible="true"] {
-  border-color: rgba(255, 255, 255, 0.72);
-  background-color: rgba(255, 255, 255, 0.35);
-  box-shadow: none;
-  outline: none;
+	border-color: rgba(255, 255, 255, 0.72);
+	background-color: rgba(255, 255, 255, 0.35);
+	box-shadow: 0 0 0 2px rgba(45, 55, 62, 0.18);
+	outline: none;
+}
+
+.photon-input:disabled {
+	cursor: not-allowed;
 }
 
 .photon-button {
@@ -155,6 +163,43 @@ input {
 .photon-button[data-focus-visible="true"] {
 	outline: 2px solid rgba(45, 55, 62, 0.4);
 	outline-offset: 2px;
+}
+
+.t-stagger-line {
+	display: block;
+	opacity: 0;
+	transform: translateY(var(--stagger-distance));
+	filter: blur(var(--stagger-blur));
+	transition:
+		opacity var(--stagger-dur) var(--stagger-ease),
+		transform var(--stagger-dur) var(--stagger-ease),
+		filter var(--stagger-dur) var(--stagger-ease);
+	will-change: transform, opacity, filter;
+}
+
+.t-stagger-line--2 {
+	transition-delay: var(--stagger-stagger);
+}
+
+.t-stagger-line--3 {
+	transition-delay: calc(var(--stagger-stagger) * 2);
+}
+
+.t-stagger.is-shown .t-stagger-line {
+	opacity: 1;
+	transform: translateY(0);
+	filter: blur(0);
+}
+
+.t-stagger.is-hiding .t-stagger-line {
+	opacity: 0;
+	transform: translateY(0);
+	filter: blur(0);
+	transition:
+		opacity 200ms ease,
+		transform 0s linear,
+		filter 0s linear;
+	transition-delay: 0s;
 }
 
 .photon-hero-stage {
@@ -200,11 +245,11 @@ input {
 
 @media (max-width: 639px) {
   .photon-page {
-    padding: 6px;
+    padding: 8px;
   }
 
   .photon-canvas {
-    min-height: calc(100dvh - 12px);
+    min-height: calc(100dvh - 16px);
     border-radius: 22px;
   }
 
@@ -233,6 +278,10 @@ input {
 	a,
 	input {
 		transition: none;
+	}
+
+	.t-stagger-line {
+		transition: none !important;
 	}
 
 }

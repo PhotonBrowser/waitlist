@@ -13,6 +13,13 @@ npm run dev
 Set `SUPABASE_URL` and `SUPABASE_PUBLISHABLE_KEY` in `.env` for working signups.
 The page still loads without them, but submissions return an error.
 
+Metadata includes the Photon title, description, canonical URL, Open Graph and
+Twitter/X text, plus the existing SVG logo as favicon. No Open Graph image is
+configured yet; add a branded static card at `/og-card.png` when one exists.
+
+The privacy notice is available at `/privacy-policy.pdf`. It currently marks
+the contact email as TODO because no project contact address is configured.
+
 ## Deploy to Vercel
 
 1. Push this repository to GitHub, GitLab, or Bitbucket.

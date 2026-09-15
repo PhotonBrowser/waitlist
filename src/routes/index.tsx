@@ -1,13 +1,15 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { motion, useReducedMotion } from "motion/react";
-import { type FormEvent, useEffect, useState } from "react";
+import { type FormEvent, useEffect, useLayoutEffect, useState } from "react";
 import Confetti from "react-confetti";
 import { joinWaitlist } from "../utils/waitlist.functions";
 
 const WAITLIST_JOINED_KEY = "photon.waitlist.joined";
 const MOTION_EASE = [0.22, 1, 0.36, 1] as const;
 const HERO_EXIT_DURATION = 760;
+const useIsomorphicLayoutEffect =
+	typeof window === "undefined" ? useEffect : useLayoutEffect;
 
 export const Route = createFileRoute("/")({ component: Home });
 
@@ -140,16 +142,21 @@ function WaitlistForm({ onJoined }: { onJoined: (message: string) => void }) {
 
 	return (
 		<form
+			aria-busy={isSubmitting}
 			className="mt-8 w-full max-w-[440px]"
 			noValidate
 			onSubmit={handleSubmit}
 		>
+			<label className="sr-only" htmlFor="email">
+				Email address
+			</label>
 			<div className="flex flex-col gap-2 rounded-[18px] border border-white/80 bg-white/45 p-1.5 shadow-[0_10px_30px_rgba(98,113,145,0.08),inset_0_1px_0_rgba(255,255,255,0.9)] backdrop-blur-xl sm:flex-row">
 				<input
-					aria-label="Email address"
-					aria-describedby={feedback ? "email-feedback" : undefined}
+					aria-describedby={
+						feedback ? "email-feedback waitlist-privacy" : "waitlist-privacy"
+					}
 					aria-invalid={status === "invalid_email"}
-					className="photon-input h-11 min-w-0 flex-1 rounded-[13px] border-white/70 bg-white/35 px-3.5 text-sm text-[#17191d] placeholder:text-[#636b78]"
+					className="photon-input h-11 min-w-0 flex-1 rounded-[13px] border-white/70 bg-white/35 px-3.5 text-sm text-[#17191d] placeholder:text-[#636b78] disabled:cursor-not-allowed disabled:opacity-65"
 					id="email"
 					name="email"
 					placeholder="you@example.com"
@@ -157,11 +164,14 @@ function WaitlistForm({ onJoined }: { onJoined: (message: string) => void }) {
 					type="email"
 					autoComplete="email"
 					value={email}
-					onChange={(event) => setEmail(event.target.value)}
+					onChange={(event) => {
+						setEmail(event.target.value);
+						if (!isSubmitting) setStatus("idle");
+					}}
 					disabled={isSubmitting}
 				/>
 				<motion.button
-					className="photon-button h-11 rounded-[13px] bg-[#17191d] px-5 text-sm font-medium text-white shadow-[0_5px_14px_rgba(20,22,27,0.16)] hover:bg-[#2a2d33] sm:min-w-[148px]"
+					className="photon-button h-11 rounded-[13px] bg-[#17191d] px-5 text-sm font-medium text-white shadow-[0_5px_14px_rgba(20,22,27,0.16)] hover:bg-[#2a2d33] disabled:cursor-not-allowed disabled:opacity-65 sm:min-w-[148px]"
 					disabled={isSubmitting}
 					type="submit"
 					transition={{
@@ -179,11 +189,19 @@ function WaitlistForm({ onJoined }: { onJoined: (message: string) => void }) {
 				<p
 					id="email-feedback"
 					aria-live="polite"
+					aria-atomic="true"
 					className="mt-2 min-h-5 text-[13px] text-[#646a74]"
 				>
 					{feedback}
 				</p>
 			)}
+			<p
+				className="mt-3 max-w-[390px] text-[11px] leading-4 text-[#646a74]"
+				id="waitlist-privacy"
+			>
+				By joining, you agree to receive Photon launch and early-access updates.
+				You can unsubscribe at any time.
+			</p>
 		</form>
 	);
 }
@@ -253,6 +271,8 @@ function WaitlistHero() {
 	const [hasJoined, setHasJoined] = useState(false);
 	const [showConfetti, setShowConfetti] = useState(false);
 	const [showSuccess, setShowSuccess] = useState(false);
+	const [isHeroShown, setIsHeroShown] = useState(false);
+	const [isHeroHiding, setIsHeroHiding] = useState(false);
 	const [joinedMessage, setJoinedMessage] = useState("You're on the list.");
 	const prefersReducedMotion = useReducedMotion();
 	const { width, height } = useWindowSize();
@@ -260,9 +280,28 @@ function WaitlistHero() {
 		? { duration: 0 }
 		: { duration: HERO_EXIT_DURATION / 1000, ease: MOTION_EASE };
 
-	useEffect(() => {
-		if (hasRememberedSignup()) setHasJoined(true);
+	useIsomorphicLayoutEffect(() => {
+		if (hasRememberedSignup()) {
+			setHasJoined(true);
+			setShowSuccess(true);
+		}
 	}, []);
+
+	useEffect(() => {
+		if (hasJoined) return;
+
+		const frame = window.requestAnimationFrame(() => setIsHeroShown(true));
+		return () => window.cancelAnimationFrame(frame);
+	}, [hasJoined]);
+
+	useEffect(() => {
+		if (!hasJoined || !isHeroShown) return;
+
+		setIsHeroShown(false);
+		setIsHeroHiding(true);
+		const timer = window.setTimeout(() => setIsHeroHiding(false), 200);
+		return () => window.clearTimeout(timer);
+	}, [hasJoined, isHeroShown]);
 
 	useEffect(() => {
 		if (!hasJoined) {
@@ -331,17 +370,19 @@ function WaitlistHero() {
 							y: hasJoined ? 6 : 0,
 							filter: hasJoined ? "blur(4px)" : "blur(0px)",
 						}}
-						className="photon-hero-content"
+						className={`photon-hero-content t-stagger${isHeroShown ? " is-shown" : ""}${isHeroHiding ? " is-hiding" : ""}`}
 						style={{ pointerEvents: hasJoined ? "none" : "auto" }}
 						transition={morphTransition}
 					>
-						<h1 className="max-w-[720px] text-balance text-[clamp(2.65rem,5.4vw,5.25rem)] font-medium leading-[0.98] tracking-[-0.05em] text-[#111318]">
+						<h1 className="t-stagger-line t-stagger-line--1 max-w-[720px] text-balance text-[clamp(2.65rem,5.4vw,5.25rem)] font-medium leading-[0.98] tracking-[-0.05em] text-[#111318]">
 							A calmer way to browse.
 						</h1>
-						<p className="mt-5 max-w-[360px] text-[15px] font-normal leading-6 text-[#646a74]">
+						<p className="t-stagger-line t-stagger-line--2 mt-5 max-w-[360px] text-[15px] font-normal leading-6 text-[#646a74]">
 							Join the waitlist for early access to Photon.
 						</p>
-						<WaitlistForm onJoined={showJoined} />
+						<div className="t-stagger-line t-stagger-line--3">
+							<WaitlistForm onJoined={showJoined} />
+						</div>
 					</motion.div>
 					<output
 						aria-atomic="true"
@@ -391,6 +432,16 @@ function Home() {
 				<div aria-hidden="true" className="photon-atmosphere" />
 				<Navbar />
 				<WaitlistHero />
+				<footer className="relative z-10 px-4 pb-4 text-center text-[11px] leading-5 text-[#646a74] sm:pb-5">
+					<a
+						className="transition-colors hover:text-[#454a53]"
+						href="/privacy-policy.pdf"
+						rel="noopener noreferrer"
+						target="_blank"
+					>
+						Privacy Policy
+					</a>
+				</footer>
 			</div>
 		</main>
 	);
